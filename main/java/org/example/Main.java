@@ -43,7 +43,6 @@ public class Main {
         int cells = row.getPhysicalNumberOfCells(); //Title Cell 수 가져오기
         String[][] dataBufferArr = new String[2][cells]; //행을 읽어서 저장해둘 배열을 생성
         int currentSaveOrder = 0; //dataBufferArr 에서 몇번째 배열인지 알려줄 인자
-        String tempValue = "zz";  //임시로 String 을 저장할 값
         NumberFormat f = NumberFormat.getInstance(); //엑셀에서 NumberFormat이 나왔을때 저장할 수 있게 생성함
         f.setGroupingUsed(false);	//지수로 안나오게 설정
 
@@ -54,26 +53,7 @@ public class Main {
 
             for (int i = 0; i < cells; i++) {
                 XSSFCell cell = row.getCell(i);
-                if(cell != null){
-                    //타입 체크
-                    switch(cell.getCellType()) {
-                        case STRING:
-                            tempValue = cell.getStringCellValue();
-                            break;
-                        case NUMERIC:
-                            tempValue = f.format(cell.getNumericCellValue())+"";
-                            break;
-                        case BLANK:
-                            tempValue = "";
-                            break;
-                        case ERROR:
-                            tempValue = cell.getErrorCellValue()+"";
-                            break;
-                    }
-                    dataBufferArr[currentSaveOrder][i] = tempValue;
-                }
-                else
-                    throw new RuntimeException("Cell Read 중 NPE 발생함");
+                dataBufferArr[currentSaveOrder][i] = readCell(cell,f);
             }
 
             //첫번째 행은 비교할게 없으므로 넘어간다.
@@ -97,6 +77,30 @@ public class Main {
 
         System.out.println("Enter 를 치면 정상 종료됩니다.");
         sc.nextLine(); //프로그램 종료 전 Holding
+    }
+
+    private static String readCell(XSSFCell cell, NumberFormat f) {
+        String tempValue = "zzz";
+        if(cell != null){
+            //타입 체크
+            switch(cell.getCellType()) {
+                case STRING:
+                    tempValue = cell.getStringCellValue();
+                    break;
+                case NUMERIC:
+                    tempValue = f.format(cell.getNumericCellValue())+"";
+                    break;
+                case BLANK:
+                    tempValue = "";
+                    break;
+                case ERROR:
+                    tempValue = cell.getErrorCellValue()+"";
+                    break;
+            }
+            return tempValue;
+        }
+        else
+            throw new RuntimeException("Cell Read 중 NPE 발생함");
     }
 
     private static void writeDataToCSV(String path, String[][] dataBuffer, int currentSaveOrder) {
